@@ -1,0 +1,60 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{fullpage}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{gensymb}
+\usepackage{parskip}
+\author{Revan~Sopher}
+\title{Detecting Planes in Real-Time for Camera Display Communications\\
+{\large Independent Study Report}}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+TODO
+\end{abstract}
+
+\section{Introduction}
+
+\subsection{Visual MIMO}
+The aim of the Visual MIMO project thus far has been to embed messages within images by varying the intensity of patches of the image, and to reliably extract these messages from pictures of the image displayed on a screen.
+
+The existing software system is capable of detecting the computer monitor, in order to to consider only the displayed image, but encounters difficulties with the variance in photometry dependent on camera and display type, and the spatial positioning of the two.
+This is addressed via radiometric calibration: nearly invisible patches are created on the corners of the image using histogram equalization, creating calibration data.
+
+TODO: expand
+
+\subsection{Mobile Challenges}
+Although the Visual MIMO project is intended to make use of the ubiquity of handheld cameras, previous work has been reliant on a precise, static configuration of high quality SLR camera and a desktop computer.
+The purpose of this independent study will be to facilitate the implementation of this algorithm to run on a mobile device, such as a smartphone or Google Glass.
+This will require special considerations and optimizations to compensate for the significantly weaker processor and average cameras: the processing limitations can be mitigated by lower level programming and memory management using the Android Native Development Kit, but the lower quality image and light sensors may need experimentation.
+
+The primary focus of this study is in addressing the issues that arise from the spatial differences between the camera and the screen: although radiometric calibration can mitigate such differences, the resulting calibration is only valid for the current positions, resulting in a fragile setup unsuitable for casual demonstrations.
+
+The goal is to increase the accuracy of imperfect positioning, without requiring explicit calibration.
+
+\section{Image Tracking with Vuforia}
+The Android application is built around the Qualcomm Vuforia SDK [TODO: citation], a library meant for facilitating the construction of Augmented Reality applications.
+Vuforia is used for its image tracking capabilities: known "targets" are trained ahead of time, and are quickly and reliably detected in realtime.
+
+Upon detection,	Vuforia provides the pose matrix. Combined with the known size of the target image, we can calculate the position of the image corners.
+\section{Native Image Processing}
+\subsection{Image Format}
+The camera image is encoded in RGB888, meaning a one dimensional array of tuples of red, grean, blue values from 0 to 255.
+This format was selected over alternatives for its large information quantity.
+
+\subsection{Message Extraction}
+TODO: Subtraction and division
+
+\subsection{Skew Correction}
+
+\section{Google Glass}
+
+\section{Future Work}
+
+\end{document}
