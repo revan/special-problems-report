@@ -3,3 +3,6 @@
 *.dvi
 *.auxlock
 *.blg
+*.bbl
+*.run.xml
+*.synctex.gz

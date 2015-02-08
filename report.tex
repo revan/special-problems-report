@@ -1,5 +1,6 @@
 \documentclass[11pt, letterpaper]{article}
-\usepackage[utf8]{inputenc}
+\usepackage[backend=bibtex]{biblatex}
+\bibliography{bib}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -39,22 +40,84 @@ The primary focus of this study is in addressing the issues that arise from the 
 The goal is to increase the accuracy of imperfect positioning, without requiring explicit calibration.
 
 \section{Image Tracking with Vuforia}
-The Android application is built around the Qualcomm Vuforia SDK [TODO: citation], a library meant for facilitating the construction of Augmented Reality applications.
+The Android application is built around the Qualcomm Vuforia SDK \cite{vuforia}, a library meant for facilitating the construction of Augmented Reality applications.
 Vuforia is used for its image tracking capabilities: known "targets" are trained ahead of time, and are quickly and reliably detected in realtime.
 
 Upon detection,	Vuforia provides the pose matrix. Combined with the known size of the target image, we can calculate the position of the image corners.
+
 \section{Native Image Processing}
 \subsection{Image Format}
 The camera image is encoded in RGB888, meaning a one dimensional array of tuples of red, grean, blue values from 0 to 255.
 This format was selected over alternatives for its large information quantity.
 
-\subsection{Message Extraction}
-TODO: Subtraction and division
-
 \subsection{Skew Correction}
+The usage of a mobile device for image capture necessarily forecloses angular calibration.
+As such, the image captured is usually not head on (Figure~\ref{fig:skew}).
+In this step, we use a projective transformation to correct for skew.
+
+First we obtain the $3 \times 3$ transformation matrix, such that:
+
+$$
+\begin{pmatrix}
+t_i x_i^*\\
+t_i y_i^*\\
+t_i
+\end{pmatrix}\\
+= \text{transformation\_matrix} \cdot
+\begin{pmatrix}
+t_i x_i\\
+t_i y_i\\
+1
+\end{pmatrix}
+$$
+That is, we map each corner to the proper rectangular positions.
+
+Having calculated the corner positions previously and knowing the shape of the original image, this is easily accomplished with OpenCV\cite{opencv_getperspectivetransform}.
+
+Next, we apply the transformation by multiplying the found matrix with each point in the image.
+This is again straightforward with OpenCV \cite{opencv_warpperspective}, yielding Figure~\ref{fig:skew2}.
+
+\begin{figure}[hbtp]
+\centering
+\includegraphics[scale=0.10]{img/skew.png}
+\caption{An image viewed at an oblique angle.}
+\label{fig:skew}
+\end{figure}
+
+\begin{figure}[hbtp]
+\centering
+\includegraphics[scale=0.2]{img/skew2.png}
+\caption{The image, skew-corrected by projective transformation.}
+\label{fig:skew2}
+\end{figure}
+
+\subsection{Histogram Equalization}
+TODO (once I work out partial histogram equalization)
+
+\subsection{Subtraction}
+With both targets skew-adjusted and normalized, we subtract one image from the other:
+
+$$\text{dst}[I] = \text{saturate}(\text{src1}[I] - \text{src2}[I])$$ where $I$ is the image matrix\cite{opencv_subtraction}.
+
+As the non-message part of the images should match up, this should leave only the message (Figure~\ref{fig:subtract}).
+
+\begin{figure}[hbtp]
+\centering
+\includegraphics[scale=0.2]{img/subtract.png}
+\caption{An example of subtraction.}
+\label{fig:subtract}
+\end{figure}
+
+\subsection{Information Extraction}
+Having isolated the encoded pattern, we must then decode the information inside.
+
+TODO
 
 \section{Google Glass}
+TODO: future work?
 
 \section{Future Work}
+TODO
 
+\printbibliography
 \end{document}
