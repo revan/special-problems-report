@@ -10,6 +10,8 @@
 \usepackage{graphicx}
 \usepackage{gensymb}
 \usepackage{parskip}
+\usepackage{tikz}
+\usepackage{tikz-timing}
 \author{Revan~Sopher}
 \title{Detecting Planes in Real-Time for Camera Display Communications\\
 {\large Independent Study Report}}
@@ -142,13 +144,20 @@ For each frame, we calculate the average intensity, and select the combination o
 We estimate that the refresh speed of the camera is ~20 FPS, so we fix the refresh speed of the encoded message at 10 FPS, the Nyquist frequency for this camera.
 
 The reasoning for this method is based on the idea that the transitions between frames on the display are non-instantaneous, causing inaccuracies in decoding.
-By sampling at twice the rate of the display, we can be reasonably sure that we will capture at least one clean picture of both states of the frame. (Figure~\ref{fig:slidingwindow}).
+By sampling at twice the rate of the display, we can be reasonably sure that we will capture at least one clean picture of both states of the frame. (Figure~\ref{fig:multisampling}).
 
-\begin{figure}[slidingwindow]
+\begin{figure}[multisampling]
   \centering
-  TODO
-  \caption{Illustration of the Sliding Window}
-  \label{fig:slidingwindow}
+
+  \Large
+
+\begin{tikztimingtable}
+  camera samples ($N$ Hz) & 8s 2{x 4D{clean} x 4D{dirty}}x\\
+  displayed frames ($\frac{N}{2}$ Hz) & 3m 8D{img+msg}  3m 8D{img-msg} 3m 8D{img+msg} 3m \\
+\end{tikztimingtable}
+
+  \caption{Multisampling technique compensates for synchronization and switching times to reliably provide a clean image of both the positive and negative frames}
+  \label{fig:multisampling}
 \end{figure}
 
 
