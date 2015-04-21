@@ -19,7 +19,8 @@
 \maketitle
 
 \begin{abstract}
-TODO
+We implement a prototype Android system for extracting a message from a subtly intensity-encoded carrier image.
+The system is novel in that it requires no camera calibration in color or in space.
 \end{abstract}
 
 \section{Introduction}
@@ -30,12 +31,13 @@ The aim of the Visual MIMO project thus far has been to embed messages within im
 The existing software system is capable of detecting the computer monitor, in order to to consider only the displayed image, but encounters difficulties with the variance in photometry dependent on camera and display type, and the spatial positioning of the two.
 This is addressed via radiometric calibration: nearly invisible patches are created on the corners of the image using histogram equalization, creating calibration data.
 
-TODO: expand
+Although the Visual MIMO project is intended to make use of the ubiquity of handheld cameras, previous work has been reliant on a precise, static configuration of high quality SLR camera and a desktop computer, with processing performed post hoc.
+
+The purpose of this independent study independent study is to implement this algorithm on a mobile device.
 
 \subsection{Mobile Challenges}
-Although the Visual MIMO project is intended to make use of the ubiquity of handheld cameras, previous work has been reliant on a precise, static configuration of high quality SLR camera and a desktop computer.
-The purpose of this independent study will be to facilitate the implementation of this algorithm to run on a mobile device, such as a smartphone or Google Glass.
-This will require special considerations and optimizations to compensate for the significantly weaker processor and average cameras: the processing limitations can be mitigated by lower level programming and memory management using the Android Native Development Kit, but the lower quality image and light sensors may need experimentation.
+
+This requires special considerations and optimizations to compensate for the significantly weaker processor and average cameras: the processing limitations can be mitigated by lower level programming and memory management using the Android Native Development Kit, but the lower quality image and light sensors has no obvious fix.
 
 The primary focus of this study is in addressing the issues that arise from the spatial differences between the camera and the screen: although radiometric calibration can mitigate such differences, the resulting calibration is only valid for the current positions, resulting in a fragile setup unsuitable for casual demonstrations.
 
@@ -43,9 +45,14 @@ The goal is to increase the accuracy of imperfect positioning, without requiring
 
 \section{Image Tracking with Vuforia}
 The Android application is built around the Qualcomm Vuforia SDK \cite{vuforia}, a library meant for facilitating the construction of Augmented Reality applications.
-Vuforia is used for its image tracking capabilities: known "targets" are trained ahead of time, and are quickly and reliably detected in realtime.
+Vuforia is used for its image tracking capabilities: known image targets are trained ahead of time, and are quickly and reliably detected in realtime.
 
-Upon detection,	Vuforia provides the pose matrix. Combined with the known size of the target image, we can calculate the position of the image corners.
+Upon detection,	Vuforia provides the pose matrix. Combined with the known size of the target image, we can calculate the position of the image corners, allowing us to 
+
+\section{Message Encoding}
+The source message is generated in MATLAB. The bit string message to be encoded is turned into an 8x10 grid where each sector is either ``on'' with an intensity of $\alpha$, or ``off'' with an intensity of $0$. The edges of the blocks are blended to reduce the visual impact of the sharp edges.
+
+This grid is added and subtracted to the carrier image to create two frames. These frames are displayed alternating on the computer screen.
 
 \section{Native Image Processing}
 \subsection{Image Format}
@@ -96,9 +103,10 @@ This is again straightforward with OpenCV \cite{opencv_warpperspective}, yieldin
 \subsection{Histogram Equalization}
 In the histogram equalization step, we improve the image contrast and transfer faithfulness by ``stretching'' the pixel intensity histogram to resemble a normal distribution (Figure~\ref{fig:histogram}).
 
+We perform histogram equalization on both the source image and the captured image, which improves TODO CITATION.
+
 Optimally we apply the same transformation to both images, however this is not especially straightforward using OpenCV so we rely on the two images having similar transforms and run the histogram equalization function twice.
 
-The source image is histogram equalized before encoding and in decoding, which helps? TODO
 \begin{figure}[hbtp]
 \centering
 \includegraphics[scale=0.2]{img/histeq1.jpg}
@@ -114,6 +122,8 @@ $$\text{dst}[I] = \text{saturate}(\text{src1}[I] - \text{src2}[I])$$ where $I$ i
 
 As the non-message part of the images should match up, this should leave only the message (Figure~\ref{fig:subtract}).
 
+$$\frac{(\text{frame + message}) - (\text{frame - message})}{2} = \text{message}$$
+
 \begin{figure}[hbtp]
 \centering
 \includegraphics[scale=0.2]{img/subtract.png}
@@ -124,27 +134,23 @@ As the non-message part of the images should match up, this should leave only th
 \subsection{Information Extraction}
 Having isolated the encoded pattern, we must then decode the information inside.
 
-We divide the difference image into a grid, and compare the average intensity of each quadrant against the average intensity of the entire image.
-Assuming a even distribution of 1's and 0's, the average intensity of the entire image will be approximately halfway between the ``on'' and ``off'' intensities.
-
-\section{Accuracy Benchmark}
-Accuracy is evaluated by encoding a known random binary string, and testing the errors in transmission.
-
-\subsection{Results}
-TODO
+We divide the difference image into a grid, and compare the average intensity of each sector against the average intensity of the entire image.
+Assuming a mostly even distribution of 1's and 0's, the average intensity of the entire image will be approximately halfway between the ``on'' and ``off'' intensities. Thus we interpret any sector as a 1 or 0 depending on if its average intensity is greater or less than the general average.
 
 \section{Synchronization}
 Earlier iterations of the system had no synchronization measures in place, so the two frames chosen for subtraction were often not properly matched.
-Combination such as both frames displaying the message added, or both subtracted, lead to unusable resulting images.
-The system also breaks when encountering frames that are between clean updates on the screen.
+Combination such as both frames displaying the message added, or both subtracted, lead to nearly resulting images.
 
-\subsection{Sliding Window}
+The system also breaks when encountering frames that are between clean updates on the screen: there is a switching period involved in updating the source display.
+
+\subsection{Multisampling}
 This synchronization method involved taking four frames rather than just two, and selecting the best two frames to perform the subtraction and extraction on.
 For each frame, we calculate the average intensity, and select the combination of two frames which maximizes the absolute value of the difference of their intensities.
+
 We estimate that the refresh speed of the camera is ~20 FPS, so we fix the refresh speed of the encoded message at 10 FPS, the Nyquist frequency for this camera.
 
 The reasoning for this method is based on the idea that the transitions between frames on the display are non-instantaneous, causing inaccuracies in decoding.
-By sampling at twice the rate of the display, we can be reasonably sure that we will capture at least one clean picture of both states of the frame. (Figure~\ref{fig:multisampling}).
+By sampling at twice the rate of the display, we can be reasonably sure that we will capture at least one clean picture of both frames, (img+msg) and (img-msg). (Figure~\ref{fig:multisampling}).
 
 \begin{figure}[multisampling]
   \centering
@@ -152,8 +158,8 @@ By sampling at twice the rate of the display, we can be reasonably sure that we 
   \Large
 
 \begin{tikztimingtable}
-  camera samples ($N$ Hz) & 8s 2{x 4D{clean} x 4D{dirty}}x\\
-  displayed frames ($\frac{N}{2}$ Hz) & 3m 8D{img+msg}  3m 8D{img-msg} 3m 8D{img+msg} 3m \\
+  continuous displayed frames ($\frac{N}{2}$ Hz) & D 2m 6D{img+msg}  2m 6D{img-msg} 2m 6D{img+msg} 2m D\\
+  4 camera samples ($N$ Hz) & 6s | 2{x 3D{clean} x 3D{dirty}} | \\
 \end{tikztimingtable}
 
   \caption{Multisampling technique compensates for synchronization and switching times to reliably provide a clean image of both the positive and negative frames}
@@ -161,14 +167,15 @@ By sampling at twice the rate of the display, we can be reasonably sure that we 
 \end{figure}
 
 
+\section{Future Work}
+
 \subsection{Multi-frame Messages}
 The implementation described thus far only allows for as much information as can be encoded into a single image.
 In order to scale this prototype arbitrarily, we must be able to encode and decode a series of messages sequentially.
 
-To this end, the last few blocks of the message are reserved for an index giving the position of the message relative to the other messages.
-TODO
+To this end, the last few blocks of the message will be reserved for an index giving the position of the message relative to the other messages, in a Sliding Window implementation.
 
-\section{Google Glass}
+\subsection{Google Glass}
 Porting to Google Glass poses several problems. Primarily, the processing capabilities are limited: not only is the processor weaker, but the heat generated by performing heavy computations locally causes the device to overheat.
 Therefore, the ``proper'' approach to such an application on Google Glass would consist of offloading all processing to a server, however this means such an implementation is less technically interesting.
 
