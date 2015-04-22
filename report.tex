@@ -126,8 +126,11 @@ $$\frac{(\text{frame + message}) - (\text{frame - message})}{2} = \text{message}
 
 \begin{figure}[hbtp]
 \centering
-\includegraphics[scale=0.2]{img/subtract.png}
-\caption{An example of subtraction.}
+\includegraphics[scale=0.2]{img/subtract1.png}
+\includegraphics[scale=0.2]{img/subtract2.png}
+\\
+\includegraphics[scale=0.2]{img/subtract3.png}
+\caption{An example of subtraction at $\alpha = 10$. 96.25\% accuracy on the retrieval of the embedded message "abcdefghijk".}
 \label{fig:subtract}
 \end{figure}
 
@@ -136,6 +139,8 @@ Having isolated the encoded pattern, we must then decode the information inside.
 
 We divide the difference image into a grid, and compare the average intensity of each sector against the average intensity of the entire image.
 Assuming a mostly even distribution of 1's and 0's, the average intensity of the entire image will be approximately halfway between the ``on'' and ``off'' intensities. Thus we interpret any sector as a 1 or 0 depending on if its average intensity is greater or less than the general average.
+
+We assembled the bit string, row by row.
 
 \section{Synchronization}
 Earlier iterations of the system had no synchronization measures in place, so the two frames chosen for subtraction were often not properly matched.
@@ -160,6 +165,13 @@ By sampling at twice the rate of the display, we can be reasonably sure that we 
 \begin{tikztimingtable}
   continuous displayed frames ($\frac{N}{2}$ Hz) & D 2m 6D{img+msg}  2m 6D{img-msg} 2m 6D{img+msg} 2m D\\
   4 camera samples ($N$ Hz) & 6s | 2{x 3D{clean} x 3D{dirty}} | \\
+  \extracode
+  \begin{pgfonlayer}{background}
+  \begin{scope}[gray]
+  \foreach \x in {3, 6, 6.5, 9.5, 10, 13, 13.5, 16.5}
+  	\draw (\x, 0) -- (\x, -2);
+  	\end{scope}
+  	\end{pgfonlayer}
 \end{tikztimingtable}
 
   \caption{Multisampling technique compensates for synchronization and switching times to reliably provide a clean image of both the positive and negative frames}
