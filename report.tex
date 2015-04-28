@@ -39,29 +39,37 @@ The purpose of this independent study independent study is to implement this alg
 
 This requires special considerations and optimizations to compensate for the significantly weaker processor and average cameras: the processing limitations can be mitigated by lower level programming and memory management using the Android Native Development Kit, but the lower quality image and light sensors has no obvious fix.
 
-The primary focus of this study is in addressing the issues that arise from the spatial differences between the camera and the screen: although radiometric calibration can mitigate such differences, the resulting calibration is only valid for the current positions, resulting in a fragile setup unsuitable for casual demonstrations.
+The primary focus of this study is in addressing the issues that arise from the spatial differences between the camera and the screen: although radiometric calibration can mitigate such differences, the resulting calibration is only valid for the current position, resulting in a fragile setup unsuitable for casual demonstrations.
 
 The goal is to increase the accuracy of imperfect positioning, without requiring explicit calibration.
 
-\section{Image Tracking with Vuforia}
-The Android application is built around the Qualcomm Vuforia SDK \cite{vuforia}, a library meant for facilitating the construction of Augmented Reality applications.
-Vuforia is used for its image tracking capabilities: known image targets are trained ahead of time, and are quickly and reliably detected in realtime.
-
-Upon detection,	Vuforia provides the pose matrix. Combined with the known size of the target image, we can calculate the position of the image corners, allowing us to 
-
 \section{Message Encoding}
-The source message is generated in MATLAB. The bit string message to be encoded is turned into an 8x10 grid where each sector is either ``on'' with an intensity of $\alpha$, or ``off'' with an intensity of $0$. The edges of the blocks are blended to reduce the visual impact of the sharp edges.
+The source message is generated in MATLAB. The bit string message to be encoded is turned into an 8x10 grid where each sector is either ``on'' with an intensity of $\alpha$, or ``off'' with an intensity of $0$.
+Higher values of $\alpha$ are more accurate, but more visible.
+The edges of the blocks are blended to reduce the visual impact of the sharp edges.
 
-This grid is added and subtracted to the carrier image to create two frames. These frames are displayed alternating on the computer screen.
+This grid is added and subtracted to the carrier image to create two frames (Figure~\ref{fig:message}). These frames are displayed alternating on the computer screen.
 
-\section{Native Image Processing}
-\subsection{Image Format}
-The camera image is encoded in RGB888, meaning a one dimensional array of tuples of red, grean, blue values from 0 to 255.
-This format was selected over alternatives for its large information quantity.
+\begin{figure}[hbtp]
+\centering
+\includegraphics[scale=0.5]{img/message1.png}
+\includegraphics[scale=0.5]{img/message2.png}
+\caption{An example of message embedding: the message is turned into a subtle grid pattern, then added and subtracted to carrier image to produce two frames.}
+\label{fig:message}
+\end{figure}
+
+\section{Mobile Image Processing}
+
+\subsection{Plane Tracking with Vuforia}
+The Android application uses the Qualcomm Vuforia SDK \cite{vuforia}, a library meant for facilitating the construction of Augmented Reality applications.
+Vuforia is used for its image tracking capabilities: known image targets are trained ahead of time, and are quickly and reliably detected in real-time.
+
+Upon detection,	Vuforia provides the pose matrix. Combined with the known size of the target image camera parameters, we can calculate the position of the image corners, allowing us to process only the relevant part of the image.
+
 
 \subsection{Skew Correction}
 The usage of a mobile device for image capture necessarily forecloses angular calibration.
-As such, the image captured is usually not head on (Figure~\ref{fig:skew}).
+As such, the image captured is usually not perfectly head on.
 In this step, we use a projective transformation to correct for skew.
 
 First we obtain the $3 \times 3$ transformation matrix, such that:
@@ -84,21 +92,16 @@ That is, we map each corner to the proper rectangular positions.
 Having calculated the corner positions previously and knowing the shape of the original image, this is easily accomplished with OpenCV\cite{opencv_getperspectivetransform}.
 
 Next, we apply the transformation by multiplying the found matrix with each point in the image.
-This is again straightforward with OpenCV \cite{opencv_warpperspective}, yielding Figure~\ref{fig:skew2}.
+This is again straightforward with OpenCV \cite{opencv_warpperspective}, yielding Figure~\ref{fig:skew}.
 
 \begin{figure}[hbtp]
 \centering
 \includegraphics[scale=0.10]{img/skew.png}
-\caption{An image viewed at an oblique angle.}
+\includegraphics[scale=0.2]{img/skew2.png}
+\caption{An image viewed at an oblique angle, then the image, skew-corrected and extracted by projective transformation.}
 \label{fig:skew}
 \end{figure}
 
-\begin{figure}[hbtp]
-\centering
-\includegraphics[scale=0.2]{img/skew2.png}
-\caption{The image, skew-corrected by projective transformation.}
-\label{fig:skew2}
-\end{figure}
 
 \subsection{Histogram Equalization}
 In the histogram equalization step, we improve the image contrast and transfer faithfulness by ``stretching'' the pixel intensity histogram to resemble a normal distribution (Figure~\ref{fig:histogram}).
@@ -109,8 +112,8 @@ Optimally we apply the same transformation to both images, however this is not e
 
 \begin{figure}[hbtp]
 \centering
-\includegraphics[scale=0.2]{img/histeq1.jpg}
-\includegraphics[scale=0.2]{img/histeq2.jpg}
+\includegraphics[scale=0.3]{img/histeq1.jpg}
+\includegraphics[scale=0.3]{img/histeq2.jpg}
 \caption{An example of histogram equalization of an image: original on the left.}
 \label{fig:histogram}
 \end{figure}
@@ -140,13 +143,13 @@ Having isolated the encoded pattern, we must then decode the information inside.
 We divide the difference image into a grid, and compare the average intensity of each sector against the average intensity of the entire image.
 Assuming a mostly even distribution of 1's and 0's, the average intensity of the entire image will be approximately halfway between the ``on'' and ``off'' intensities. Thus we interpret any sector as a 1 or 0 depending on if its average intensity is greater or less than the general average.
 
-We assembled the bit string, row by row.
+We assemble the bit string, row by row.
 
 \section{Synchronization}
 Earlier iterations of the system had no synchronization measures in place, so the two frames chosen for subtraction were often not properly matched.
 Combination such as both frames displaying the message added, or both subtracted, lead to nearly resulting images.
 
-The system also breaks when encountering frames that are between clean updates on the screen: there is a switching period involved in updating the source display.
+The system would also break when encountering frames that are between clean updates on the screen: there is a switching period involved in updating the source display.
 
 \subsection{Multisampling}
 This synchronization method involved taking four frames rather than just two, and selecting the best two frames to perform the subtraction and extraction on.
@@ -157,7 +160,7 @@ We estimate that the refresh speed of the camera is ~20 FPS, so we fix the refre
 The reasoning for this method is based on the idea that the transitions between frames on the display are non-instantaneous, causing inaccuracies in decoding.
 By sampling at twice the rate of the display, we can be reasonably sure that we will capture at least one clean picture of both frames, (img+msg) and (img-msg). (Figure~\ref{fig:multisampling}).
 
-\begin{figure}[multisampling]
+\begin{figure}[hbtp]
   \centering
 
   \Large
@@ -178,6 +181,8 @@ By sampling at twice the rate of the display, we can be reasonably sure that we 
   \label{fig:multisampling}
 \end{figure}
 
+\section{Results}
+TODO: data tables
 
 \section{Future Work}
 
