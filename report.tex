@@ -13,7 +13,8 @@
 \usepackage{tikz}
 \usepackage{tikz-timing}
 \usepackage{booktabs}
-\usepackage{subcaption}
+\usepackage[labelformat=simple]{subcaption}
+\DeclareCaptionSubType[arabic]{figure}
 \author{Revan~Sopher}
 \title{Detecting Planes in Real-Time for Camera Display Communications\\
 {\large Independent Study Report}}
@@ -187,18 +188,10 @@ By sampling at twice the rate of the display, we can be reasonably sure that we 
 We test the message recovery accuracy for the message ``abcdefghijk''.
 
 \subsection{Various Carrier Images}
-We first test fifteen carrier images (Figure~\ref{fig:fifteen}) to find average accuracy (Table~\ref{tab:images}). These images are trained for Vuforia, but some are more easily tracked than others; images 2, 9, and 11 could not reliably be tracked by Vuforia, making them unfeasible for the system.
-Results show that, ignoring images 3 and 12 which were dark and without color, the system achieves $ >90 \% $ accuracy.
-
-\begin{figure}[hbtp]
-\centering
-\caption{The fifteen carrier images tested.}
-\label{fig:fifteen}
-\end{figure}
 
 \begin{table}[t]
-\label{tab:images}
 \caption{Various Carrier Images, $\alpha=10$}
+\label{tab:images}
 \centering
 \begin{tabular}{c | l l l l l l l}
 \\
@@ -227,14 +220,36 @@ Image&1&2&3&4&5&AVG\\
 \end{tabular} 
 \end{table}
 
+We first test fifteen carrier images (Figure~\ref{fig:fifteen}) to find average accuracy (Table~\ref{tab:images}). These images are trained for Vuforia, but some are more easily tracked than others; images 2, 9, and 11 could not reliably be tracked by Vuforia, making them unfeasible for the system.
+Results show that, ignoring images 3 and 12 which were dark and without color, the system achieves $ >90 \% $ accuracy.
+
+\begin{figure}[t]
+\centering
+
+\subcaptionbox{}[0.2 \textwidth]{\includegraphics[width=.2\textwidth]{img/1.jpg}}
+\subcaptionbox{}[0.2 \textwidth]{\includegraphics[width=.2\textwidth]{img/2.jpg}}
+\subcaptionbox{}[0.2 \textwidth]{\includegraphics[width=.2\textwidth]{img/3.jpg}}
+\subcaptionbox{}[0.2 \textwidth]{\includegraphics[width=.2\textwidth]{img/4.jpg}}
+\subcaptionbox{}[0.2 \textwidth]{\includegraphics[width=.2\textwidth]{img/5.jpg}}
+\subcaptionbox{}[0.2 \textwidth]{\includegraphics[width=.2\textwidth]{img/6.jpg}}
+\subcaptionbox{}[0.2 \textwidth]{\includegraphics[width=.2\textwidth]{img/7.jpg}}
+\subcaptionbox{}[0.2 \textwidth]{\includegraphics[width=.2\textwidth]{img/8.jpg}}
+\subcaptionbox{}[0.2 \textwidth]{\includegraphics[width=.2\textwidth]{img/9.jpg}}
+\subcaptionbox{}[0.2 \textwidth]{\includegraphics[width=.2\textwidth]{img/10.jpg}}
+\subcaptionbox{}[0.2 \textwidth]{\includegraphics[width=.2\textwidth]{img/11.jpg}}
+\subcaptionbox{}[0.2 \textwidth]{\includegraphics[width=.2\textwidth]{img/12.jpg}}
+\subcaptionbox{}[0.2 \textwidth]{\includegraphics[width=.2\textwidth]{img/13.jpg}}
+\subcaptionbox{}[0.2 \textwidth]{\includegraphics[width=.2\textwidth]{img/14.jpg}}
+\subcaptionbox{}[0.2 \textwidth]{\includegraphics[width=.2\textwidth]{img/15.jpg}}
+
+\caption{The fifteen carrier images tested. Images 1, 5, 7, 13, and 15 were the best.}
+\label{fig:fifteen}
+\end{figure}
 
 \subsection{Various $\alpha$ Values}
-We then test the effects of various values of $\alpha$ on the best performing carrier images.
-Higher values of $\alpha$ are easier for the system to process, but also easier to detect by a human: we try to minimize the value.
-We show that at $\alpha = 5$, the accuracy degrades below $90 \% $ (Table~\ref{tab:alpha}).
 \begin{table}[t]
-\label{tab:alpha}
 \caption{Various $\alpha$ Values: at $\alpha = 5$, the accuracy degrades to below $90 \% $}
+\label{tab:alpha}
 \centering
 \begin{tabular}{c c | l l l l l l l l}
 \\
@@ -262,12 +277,15 @@ Image&Alpha&1&2&3&4&5&AVG&avg/image&avg/alpha\\
 \end{tabular}
 \end{table}
 
-\subsection{Various Viewing Angles}
-We now test the effects of differing viewing angles on accuracy. Previous trials were captured at approximately $0 \degree$, that is, head on. This experiment shows that message accuracy does not appreciably change as we increase the obliqueness of the view, however the reliability of Vuforia's target tracking drops off approaching $45 \degree$, to the point that target acquisition was noticeably slow for most images. (Table~\ref{tab:angles}).
+We then test the effects of various values of $\alpha$ on the best performing carrier images.
+Higher values of $\alpha$ are easier for the system to process, but also easier to detect by a human: we try to minimize the value.
+We show that at $\alpha = 5$, the accuracy degrades below $90 \% $ (Table~\ref{tab:alpha}).
 
+
+\subsection{Various Viewing Angles}
 \begin{table}[t]
-\label{tab:angles}
 \caption{Various Viewing Angles, $\alpha=10$: no change in accuracy, but Vuforia tracking degrades.}
+\label{tab:angles}
 \centering
 \begin{tabular}{c c | l l l l l l l}
 \\
@@ -294,6 +312,9 @@ Image&Angle&1&2&3&4&5&AVG&avg per image\\
 &&&&&\multicolumn{2}{r}{Total avg:}&0.961&\\
 \end{tabular}
 \end{table}
+
+We now test the effects of differing viewing angles on accuracy. Previous trials were captured at approximately $0 \degree$, that is, head on. This experiment shows that message accuracy does not appreciably change as we increase the obliqueness of the view, however the reliability of Vuforia's target tracking drops off approaching $45 \degree$, to the point that target acquisition was noticeably slow for most images. (Table~\ref{tab:angles}).
+
 
 \section{Future Work}
 
