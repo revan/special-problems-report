@@ -12,6 +12,8 @@
 \usepackage{parskip}
 \usepackage{tikz}
 \usepackage{tikz-timing}
+\usepackage{booktabs}
+\usepackage{subcaption}
 \author{Revan~Sopher}
 \title{Detecting Planes in Real-Time for Camera Display Communications\\
 {\large Independent Study Report}}
@@ -20,7 +22,7 @@
 
 \begin{abstract}
 We implement a prototype Android system for extracting a message from a subtly intensity-encoded carrier image.
-The system is novel in that it requires no camera calibration in color, time, nor space: it is tolerant of variation in ambient light, temporal synchronization, and observation angle. The system demonstrates high accuracy running on consumer hardware.
+The system is novel in that it requires no camera calibration in color, time, nor space: it is tolerant of variation in ambient light, temporal synchronization, and observation angle. The system demonstrates $>90 \%$ running on consumer hardware.
 \end{abstract}
 
 \section{Introduction}
@@ -182,13 +184,116 @@ By sampling at twice the rate of the display, we can be reasonably sure that we 
 \end{figure}
 
 \section{Results}
-TODO: data tables
+We test the message recovery accuracy for the message ``abcdefghijk''.
 
 \subsection{Various Carrier Images}
+We first test fifteen carrier images (Figure~\ref{fig:fifteen}) to find average accuracy (Table~\ref{tab:images}). These images are trained for Vuforia, but some are more easily tracked than others; images 2, 9, and 11 could not reliably be tracked by Vuforia, making them unfeasible for the system.
+Results show that, ignoring images 3 and 12 which were dark and without color, the system achieves $ >90 \% $ accuracy.
+
+\begin{figure}[hbtp]
+\centering
+\caption{The fifteen carrier images tested.}
+\label{fig:fifteen}
+\end{figure}
+
+\begin{table}[t]
+\label{tab:images}
+\caption{Various Carrier Images, $\alpha=10$}
+\centering
+\begin{tabular}{c | l l l l l l l}
+\\
+&\multicolumn{5}{c}{Accuracy Per Trial}&\\ 
+\toprule
+Image&1&2&3&4&5&AVG\\ 
+\midrule
+1&0.9375&0.975&0.9625&0.975&1&0.97\\ 
+2&---&---&---&---&---&---&could not track\\ 
+3&0.675&0.5625&0.625&0.5875&0.5625&0.6025&black and white\\ 
+4&0.8375&0.8625&0.9125&0.9&0.9&0.8825\\ 
+5&0.9625&0.95&0.95&0.975&0.9375&0.955\\ 
+6&0.7625&0.775&0.825&0.8125&0.8125&0.7975\\ 
+7&0.95&0.95&0.9&0.95&0.95&0.94\\ 
+8&0.9125&0.7875&0.9125&0.9125&0.9125&0.8875\\ 
+9&---&---&---&---&---&---&could not track\\ 
+10&0.8875&0.8875&0.8625&0.8875&0.8875&0.8825\\ 
+11&---&---&---&---&---&---&could not track\\ 
+12&0.6125&0.55&0.6125&0.55&0.6375&0.5925&black and white\\ 
+13&0.9375&0.8375&0.9875&0.975&0.9625&0.94\\ 
+14&0.9125&0.975&0.95&0.95&0.95&0.9475\\ 
+15&0.975&0.9375&0.9875&0.975&0.9875&0.9725\\ 
+\bottomrule
+&&&&\multicolumn{2}{r}{Total avg:}&0.8642\\
+&&&&\multicolumn{2}{r}{Color avg:}&0.9175\\ 
+\end{tabular} 
+\end{table}
+
 
 \subsection{Various $\alpha$ Values}
+We then test the effects of various values of $\alpha$ on the best performing carrier images.
+Higher values of $\alpha$ are easier for the system to process, but also easier to detect by a human: we try to minimize the value.
+We show that at $\alpha = 5$, the accuracy degrades below $90 \% $ (Table~\ref{tab:alpha}).
+\begin{table}[t]
+\label{tab:alpha}
+\caption{Various $\alpha$ Values: at $\alpha = 5$, the accuracy degrades to below $90 \% $}
+\centering
+\begin{tabular}{c c | l l l l l l l l}
+\\
+&&\multicolumn{5}{c}{Accuracy Per Trial}&&&\\ 
+\toprule
+Image&Alpha&1&2&3&4&5&AVG&avg/image&avg/alpha\\ 
+\midrule
+1&20&1&0.9875&1&0.9875&0.9875&0.9925&0.9675&0.9535\\ 
+&10&0.9875&0.925&1&0.9875&0.975&0.975&&0.955\\ 
+&5&0.875&0.975&0.8625&0.975&0.9875&0.935&&0.8819\\ 
+5&20&0.95&0.95&0.95&0.95&0.95&0.95&0.9225&\\ 
+&10&0.95&0.95&0.95&0.9375&0.975&0.9525&&\\ 
+&5&0.9625&0.925&0.8375&0.9&0.7&0.865&&\\ 
+7&20&0.95&0.95&0.7875&0.95&0.95&0.9175&0.9217&\\ 
+&10&0.95&0.9375&0.95&0.9375&0.925&0.94&&\\ 
+&5&0.8&0.9375&0.9&0.95&0.95&0.9075&&\\ 
+13&20&0.9375&0.9375&0.925&0.9625&0.9375&0.94&0.909&\\ 
+&10&0.9375&0.95&0.875&0.95&0.95&0.9325&&\\ 
+&5&0.875&0.9125&0.875&0.8625&0.7475&0.8545&&\\ 
+15&20&0.95&0.9625&0.9875&0.975&0.9625&0.9675&0.92083&\\ 
+&10&0.975&0.9625&0.975&0.9625&1&0.975&&\\ 
+&5&0.9375&0.85&0.6625&0.825&0.825&0.82&&\\ 
+\bottomrule 
+&&&&&\multicolumn{2}{r}{Total avg:}&0.928&&\\ 
+\end{tabular}
+\end{table}
 
 \subsection{Various Viewing Angles}
+We now test the effects of differing viewing angles on accuracy. Previous trials were captured at approximately $0 \degree$, that is, head on. This experiment shows that message accuracy does not appreciably change as we increase the obliqueness of the view, however the reliability of Vuforia's target tracking drops off approaching $45 \degree$, to the point that target acquisition was noticeably slow for most images. (Table~\ref{tab:angles}).
+
+\begin{table}[t]
+\label{tab:angles}
+\caption{Various Viewing Angles, $\alpha=10$: no change in accuracy, but Vuforia tracking degrades.}
+\centering
+\begin{tabular}{c c | l l l l l l l}
+\\
+&& \multicolumn{5}{c}{Accuracy Per Trial $\alpha=10$}&&\\
+\toprule
+Image&Angle&1&2&3&4&5&AVG&avg per image\\
+\midrule
+1&0&0.9875&1&0.9875&0.975&0.9875&0.9875&0.9708\\
+&30&0.975&0.9625&0.975&0.9625&0.9875&0.9725&\\
+&45&0.975&0.975&0.9625&0.9625&0.8875&0.9525&\\
+5&0&0.9625&0.9625&0.9625&0.9625&0.925&0.955&0.9608\\
+&30&0.9625&0.9625&0.925&0.95&0.975&0.955&\\
+&45&0.975&0.9625&0.975&0.975&0.975&0.9725&\\
+7&0&0.9375&0.95&0.95&0.925&0.95&0.9425&0.9533\\
+&30&0.975&0.95&0.95&0.9375&0.9&0.9425&\\
+&45&0.975&0.975&0.9875&0.975&0.9625&0.975&\\
+13&0&0.975&0.9625&0.8625&0.975&0.9625&0.9475&0.9417\\
+&30&0.9&0.9375&0.925&0.9625&0.9375&0.9325&\\
+&45&0.9375&0.925&0.95&0.9625&0.95&0.945&\\
+15&0&1&1&0.9875&0.9875&0.9625&0.9875&0.98725\\
+&30&1&1&0.935&1&1&0.987&\\
+&45&---&---&---&---&---&---&could not track\\ 
+\bottomrule
+&&&&&\multicolumn{2}{r}{Total avg:}&0.961&\\
+\end{tabular}
+\end{table}
 
 \section{Future Work}
 
