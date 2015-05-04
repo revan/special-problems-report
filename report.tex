@@ -23,7 +23,7 @@
 
 \begin{abstract}
 We implement a prototype Android system for extracting a message from a subtly intensity-encoded carrier image.
-The system is novel in that it requires no camera calibration in color, time, nor space: it is tolerant of variation in ambient light, temporal synchronization, and observation angle. The system demonstrates $>90 \%$ running on consumer hardware.
+The system is novel in that it requires no camera calibration in color, time, nor space: it is tolerant of variation in ambient light, temporal synchronization, and observation angle. The system demonstrates $>90 \%$ accuracy running on consumer hardware.
 \end{abstract}
 
 \section{Introduction}
@@ -116,7 +116,7 @@ This is again straightforward with OpenCV \cite{opencv_warpperspective}, yieldin
 \subsection{Histogram Equalization}
 In the histogram equalization step, we improve the image contrast and transfer faithfulness by ``stretching'' the pixel intensity histogram to resemble a normal distribution (Figure~\ref{fig:histogram}).
 
-We perform histogram equalization on both the source image and the captured image, which improves TODO CITATION.
+We perform histogram equalization on both the source image and the captured image, which should increase message fidelity.
 
 Optimally we apply the same transformation to both images, however this is not especially straightforward using OpenCV so we rely on the two images having similar transforms and run the histogram equalization function twice.
 
