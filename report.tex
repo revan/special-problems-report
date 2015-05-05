@@ -40,7 +40,12 @@ The purpose of this independent study independent study is to implement this alg
 
 \begin{figure}[hbtp]
 \centering
-\includegraphics[width=0.5 \textwidth]{img/system.jpg}
+\huge
+$\vcenter{\hbox{\includegraphics[width=0.17 \textwidth]{img/check.png}}}$
+$\rightarrow$
+$\vcenter{\hbox{\includegraphics[width=0.5 \textwidth]{img/system.jpg}}}$
+$\rightarrow$
+$\vcenter{\hbox{\includegraphics[width=0.17 \textwidth]{img/subtract3.png}}}$
 \caption{The final system in action. A computer monitor displays a message embedded in a carrier image, and an Android phone extracts and decodes the message visually.}
 \label{fig:system}
 \end{figure}
@@ -143,7 +148,7 @@ $$\frac{(\text{frame + message}) - (\text{frame - message})}{2} = \text{message}
 \includegraphics[scale=0.2]{img/subtract2.png}
 \\
 \includegraphics[scale=0.2]{img/subtract3.png}
-\caption{An example of subtraction at $\alpha = 10$. 96.25\% accuracy on the retrieval of the embedded message "abcdefghijk".}
+\caption{An example of subtraction at $\alpha = 10$. 96.25\% accuracy on the retrieval of the embedded message "abcdefghijk". Brightness and contrast of the resulting image were increased for ease of viewing in this document.}
 \label{fig:subtract}
 \end{figure}
 
@@ -192,7 +197,7 @@ By sampling at twice the rate of the display, we can be reasonably sure that we 
 \end{figure}
 
 \section{Results}
-We test the message recovery accuracy for the message ``abcdefghijk''.
+We test the message recovery accuracy for the message ``abcdefghijk'', the longest text that can fit in the $8 \times 10 = 80$ bits. Unless otherwise noted, tests were at $\alpha=10$, $\approx 1$ meter distance, head-on.
 
 \subsection{Various Carrier Images}
 
@@ -291,12 +296,12 @@ We show that at $\alpha = 5$, the accuracy degrades below $90 \% $ (Table~\ref{t
 
 \subsection{Various Viewing Angles}
 \begin{table}[t]
-\caption{Various Viewing Angles, $\alpha=10$: no change in accuracy, but Vuforia tracking degrades.}
+\caption{Various Viewing Angles: Increasing angles causes no change in accuracy, but Vuforia tracking degrades.}
 \label{tab:angles}
 \centering
 \begin{tabular}{c c | l l l l l l l}
 \\
-&& \multicolumn{5}{c}{Accuracy Per Trial $\alpha=10$}&&\\
+&& \multicolumn{5}{c}{Accuracy Per Trial}&&\\
 \toprule
 Image&Angle&1&2&3&4&5&AVG&avg per image\\
 \midrule
